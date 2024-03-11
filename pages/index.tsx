@@ -1,100 +1,79 @@
-import { ConnectWallet } from "@thirdweb-dev/react";
+import {
+  ConnectWallet,
+  useContract,
+  useContractRead,
+  useAddress,
+  Web3Button,
+} from "@thirdweb-dev/react";
 import styles from "../styles/Home.module.css";
-import Image from "next/image";
+import { ethers } from "ethers";
 import { NextPage } from "next";
 
 const Home: NextPage = () => {
+  const nftDropAddress = "0xd1cb20D62D9b6a4828d5dBfd29fB0A82d0081736";
+  const editionDropAddress = "0xcBC93b9F21550E51Ff997b0aA908014B2526ebdb";
+  const tokenAddress = "0x9E56098548c4fafF5b005cAbB9dF7E1AfAD38788";
+
+  // get wallet address of the connected wallet
+  const address = useAddress();
+
+  // 2. get contract instance
+  const { contract: nftDropContract } = useContract(nftDropAddress);
+  const { contract: editionDropContract } = useContract(editionDropAddress);
+  const { contract: tokenContract } = useContract(tokenAddress);
+
+  // get read function "totalMinted" from the contract
+  const { data: nftDropTotalMinted, isLoading: nftDropTotalMintedIsLoading } =
+    useContractRead(nftDropContract, "totalMinted");
+
+  const {
+    data: editionDropTotalMinted,
+    isLoading: editionDropTotalMintedIsloading,
+  } = useContractRead(editionDropContract, "totalSupply", [0]);
+
+  const { data: tokenBalance, isLoading: tokenBalanceIsLoading } =
+    useContractRead(tokenContract, "balanceOf", [address]);
+
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>
-            Welcome to{" "}
-            <span className={styles.gradientText0}>
-              <a
-                href="https://thirdweb.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                thirdweb.
-              </a>
-            </span>
-          </h1>
-
-          <p className={styles.description}>
-            Get started by configuring your desired network in{" "}
-            <code className={styles.code}>src/index.js</code>, then modify the{" "}
-            <code className={styles.code}>src/App.js</code> file!
-          </p>
-
-          <div className={styles.connect}>
-            <ConnectWallet />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://portal.thirdweb.com/"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
+        <div className={styles.connect}>
+          <ConnectWallet />
+          {/* ERC721 shown the contract information on app */}
+          <h1>zkSync Era App</h1>
+          {nftDropTotalMintedIsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>Total NFTs minted: {nftDropTotalMinted?.toNumber()}</p>
+          )}
+          {/* interaction, type of contract */}
+          <Web3Button
+            contractAddress={nftDropAddress}
+            action={(contract) => contract.erc721.claim(1)}
           >
-            <Image
-              src="/images/portal-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText1}>Portal ➜</h2>
-              <p>
-                Guides, references, and resources that will help you build with
-                thirdweb.
-              </p>
-            </div>
-          </a>
-
-          <a
-            href="https://thirdweb.com/dashboard"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
+            Claim NFT Drop
+          </Web3Button>
+          <br />
+          {editionDropTotalMintedIsloading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>Total NFTs minted: {editionDropTotalMinted.toNumber()}</p>
+          )}
+          {/* erc1155(tokenId, amount) */}
+          <Web3Button
+            contractAddress={editionDropAddress}
+            action={(contract) => contract.erc1155.claim(0, 1)}
           >
-            <Image
-              src="/images/dashboard-preview.png"
-              alt="Placeholder preview of starter"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText2}>Dashboard ➜</h2>
-              <p>
-                Deploy, configure, and manage your smart contracts from the
-                dashboard.
-              </p>
-            </div>
-          </a>
+            Claim Edition NFT
+          </Web3Button>
+          {/* erc20 */}
 
-          <a
-            href="https://thirdweb.com/templates"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              src="/images/templates-preview.png"
-              alt="Placeholder preview of templates"
-              width={300}
-              height={200}
-            />
-            <div className={styles.cardText}>
-              <h2 className={styles.gradientText3}>Templates ➜</h2>
-              <p>
-                Discover and clone template projects showcasing thirdweb
-                features.
-              </p>
-            </div>
-          </a>
+          <br />
+          {tokenBalanceIsLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p>Token balance: {ethers.utils.formatUnits(tokenBalance, 18)}</p>
+          )}
         </div>
       </div>
     </main>
