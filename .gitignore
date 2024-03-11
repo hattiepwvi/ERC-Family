@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 
+
 # testing
 /coverage
 
@@ -27,13 +28,15 @@ yarn-error.log*
 
 # local env files
 .env
+.env.example
+.eslintrc.json
+.prettierrc
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.example
-.eslintrc.json
-.prettierrc
+
+
 
 # vercel
 .vercel
